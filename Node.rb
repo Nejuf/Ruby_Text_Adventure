@@ -68,6 +68,26 @@ class Node < OpenStruct
   	end
   end
   		
+  def move(thing, to, check=true)
+  	item = find(thing)
+  	dest = find(to)
+
+  	return if item.nil?
+  	if check && item.hidden?
+  		puts "You can't get to that right now."
+  		return
+  	end
+
+  	return if dest.nil?
+  	if check && (dest.hidden? || dest.open == false)
+		puts "You can't put that there."
+		return
+	end
+
+	item.parent.children.delete(item)
+	dest.children << item
+	item.parent = dest
+end
 
   def find(thing)
   	case thing
