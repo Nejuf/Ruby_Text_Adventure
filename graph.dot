@@ -1,0 +1,20 @@
+digraph 
+  {
+    node [ style = filled, style = filled, style = filled, style = filled, style = filled, style = filled, style = filled, style = filled, style = filled, style = filled, style = filled, style = filled ];
+    "root"               [ color = tomato       ];
+    "living_room"        [ color = mediumspringgreen ];
+    "kitchen"            [ color = mediumspringgreen ];
+    "player"             [ color = tomato       ];
+    "hall"               [ color = mediumspringgreen ];
+    "living_room" -> "root";
+    "cat" -> "living_room";
+    "dead_mouse" -> "cat";
+    "remote_control" -> "living_room";
+    "dead_batteries" -> "remote_control";
+    "kitchen" -> "root";
+    "player" -> "kitchen";
+    "ham_sandwich" -> "player";
+    "drawer" -> "kitchen";
+    "new_batteries" -> "drawer";
+    "hall" -> "root";
+  }

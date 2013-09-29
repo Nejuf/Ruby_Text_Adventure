@@ -1,0 +1,7 @@
+digraph 
+  {
+    "living_room" -> "kitchen" [ label = "n"          ];
+    "living_room" -> "hall" [ label = "e"          ];
+    "kitchen" -> "living_room" [ label = "s"          ];
+    "hall" -> "living_room" [ label = "w"          ];
+  }
