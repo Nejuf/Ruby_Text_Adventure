@@ -1,5 +1,6 @@
 require 'ostruct'
 require 'graph'
+require_relative 'player'
 
 class Node < OpenStruct
 
@@ -35,7 +36,7 @@ class Node < OpenStruct
   end
 
   def player(&block)
-  	Node.new(self, :player, DEFAULTS[:player], &block)
+  	Player.new(self, :player, DEFAULTS[:player], &block)
   end
 
   def self.root(&block)
