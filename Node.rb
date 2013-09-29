@@ -1,4 +1,5 @@
 require 'ostruct'
+require 'graph'
 
 class Node < OpenStruct
 
@@ -15,7 +16,6 @@ class Node < OpenStruct
 
 	self.parent = parent
 	self.parent.children << self unless parent.nil?
-	p "#{self.parent.tag} #{self.parent.children.length}" unless parent.nil?
 	self.tag = tag
 	self.children = []
 	
@@ -75,6 +75,47 @@ class Node < OpenStruct
   	return str
   end		
   			
+
+  def graph(gr=Graph.new)
+  	gr.edge tag.to_s, parent.tag.to_s unless parent.nil?
+  	gr.node_attribs << gr.filled
+
+  	if tag == :player || tag == :root
+  		gr.tomato << gr.node(tag.to_s)
+  	elsif parent && parent.tag == :root
+  		gr.mediumspringgreen << gr.node(tag.to_s)
+  	end
+
+  	children.each{|c| c.graph(gr)}
+  	return gr
+  end
+
+  def save_graph
+  	p graph
+  	graph.save 'graph'#, 'svg'
+
+  	#{}`svg2png graph.svg graph.png`
+    #{}`open graph.png`
+  end
+  			
+  def map(gr=Graph.new)
+  	if parent && parent.tag == :root
+  		methods.grep(/^exit_[a-z]+(?!=)$/) do|e|
+        dir = e.to_s.split(/_/).last.split(//).first
+        gr.edge(tag.to_s, send(e).to_s).label(dir)
+	    end
+	end
+
+	children.each{|c| c.map(gr)}
+	return gr
+  end
+
+  def save_map
+    map.save 'map'#, 'svg'
+    #{}`svg2png map.svg map.png`
+    #{}`open map.png`
+  end
+
 end
 
 
@@ -108,5 +149,7 @@ root = Node.root do
 		self.exit_west = :living_room
 	end
 end
-p root.children.length
+
 puts root
+root.save_graph
+root.save_map
