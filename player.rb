@@ -1,6 +1,14 @@
 
 class Player < Node
 
+	def play
+		loop do 
+			do_look
+			print "What now? "
+			command(gets.chomp)
+		end
+	end
+
 	%w{north south east west up down}.each do |dir|
 		define_method("do_#{dir}") do
 			do_go(dir)
