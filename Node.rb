@@ -58,6 +58,17 @@ class Node < OpenStruct
   	end
   end
 
+  def hidden?
+  	if parent.tag == :root
+  		return false
+  	elsif parent.open == false
+  		return true
+  	else
+  		return parent.hidden?
+  	end
+  end
+  		
+
   def find(thing)
   	case thing
   	when Symbol
