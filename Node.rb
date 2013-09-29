@@ -42,6 +42,21 @@ class Node < OpenStruct
   	Node.new(nil, :root, &block)
   end
 
+  def get_room
+  	if parent.tag == :root
+  		return self
+  	else
+  		return parent.get_room
+  	end
+  end
+
+  def get_root
+  	if tag == :root || parent.nil?
+  		return self
+  	else
+  		return parent.get_root
+  	end
+  end
 
   def find(thing)
   	case thing
