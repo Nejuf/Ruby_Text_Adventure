@@ -42,6 +42,77 @@ class Node < OpenStruct
   	Node.new(nil, :root, &block)
   end
 
+
+  def find(thing)
+  	case thing
+  	when Symbol
+  		find_by_tag(thing)
+  	when String
+  		find_by_string(thing)
+  	when Node
+  		thing
+  	end
+  end
+
+  def find_by_tag(tag)
+  	return self if self.tag == tag
+
+  	children.each do |c|
+  		res = c.find_by_tag(tag)
+  		return res unless res.nil?
+  	end
+
+  	return nil
+  end
+
+  def find_by_name(words, nodes=[])
+  	words = words.split unless words.is_a?(Array)
+  	nodes << self if words.include?(name)
+
+  	children.each do |c|
+  		c.find_by_name(words, nodes)
+  	end
+
+  	return nodes
+  end
+
+  def find_by_string(words)
+  	words = words.split unless words.is_a?(Array)
+  	nodes = find_by_name(words)
+
+  	if nodes.empty?
+  		puts "I don't see that here."
+  		return nil
+  	end
+
+  	#Score the nodes by the number of matching adjectives
+  	nodes.each do |i|
+  		i.search_score = (words & i.words).length
+  	end
+
+  	#Sort the score so that highest scores are at the beginning of th list
+  	nodes.sort! do |a,b|
+  		b.search_score <=> a.search_score
+  	end
+
+  	#Remove any nodes with a search score less than the score of the first item
+  	nodes.delete_if do |i|
+  		i.search_score < nodes.first.search_score
+  	end
+
+  	#Interpret the results
+  	if nodes.length == 1
+  		return nodes.first
+  	else
+  		puts "Which item do you mean?"
+  		nodes.each do |i|
+  			puts " * #{i.name} (#{i.words.join(', ')})"
+  		end
+
+  		return nil
+  	end
+  end
+
   def to_s(verbose=false, indent='')
   	bullet = if parent && parent.tag == :root
   		'#'
