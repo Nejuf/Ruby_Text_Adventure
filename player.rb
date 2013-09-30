@@ -1,4 +1,4 @@
-require_relative 'Node'
+load './node.rb'
 
 class Player < Node
 
