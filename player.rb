@@ -40,13 +40,23 @@ class Player < Node
 		if dest.nil?
 			puts "You can't go that way."
 		else
-			get_root.move(self, dest)
+			dest = get_root.find(dest)
+
+			if dest.script('enter', direction)
+				get_root.move(self, dest)
+			end
 		end
 	end
 
 	def do_take(*thing)
-		get_root.move(thing.join(' '), self)
+		thing = get_room.find(thing)
+		return if thing.nil?
+
+		if thing.script('take')
+			puts "Taken." if get_root.move(thing, self)
+		end
 	end
+	alias_method :do_get, :do_take
 
 	def do_drop(*thing)
 		move(thing.join(' '), get_room)
@@ -103,6 +113,27 @@ class Player < Node
 
 		return if item.nil? || container.nil?
 
-		get_room.move(item, container)
+		if container.script('accept', item)
+			get_room.move(item, container)
+		end
+	end
+
+	def do_use(*words)
+		prepositions = %w{ in on with }
+		prepositions.map!{|p| " #{p} "}
+
+		prep_regex = Regexp.new("(#{prepositions.join('|')})")
+		item1_words, _, item2_words = words.join(' ').split(prep_regex)
+
+		if item2_words.nil?
+			puts "I don't quite understand you."
+			return
+		end
+
+		item1 = get_room.find(item1_words)
+		item2 = get_room.find(item2_words)
+		return if item1.nil? || item2.nil?
+
+		item1.script('use', item2)
 	end
 end

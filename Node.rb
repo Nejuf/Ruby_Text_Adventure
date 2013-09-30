@@ -77,7 +77,7 @@ class Node < OpenStruct
   	dest.children << item
   	item.parent = dest
   end
-  
+
   def get_room
   	if parent.tag == :root
   		return self
@@ -269,6 +269,14 @@ end
     #{}`open map.png`
   end
 
+  def script(key, *args)
+  	if respond_to?("script_#{key}")
+  		return eval(self.send("script_#{key}"))
+  	else
+  		return true
+  	end
+  end
+
 end
 
 
@@ -278,10 +286,52 @@ root = Node.root do
 		self.exit_ease = :hall
 
 		item(:cat, 'cat', 'sleeping', 'fuzzy') do
+			self.script_take = <<-SCRIPT
+				if get_room.find(:cat).find(:dead_mouse)
+					puts "The cat makes a horrifying noise and throws up a dead mouse."
+					get_room.move(:dead_mouse, get_room, false)
+				end
+
+				puts "The cat refused to be picked up (how degrading!)"
+				return false
+			SCRIPT
+
+			self.script_control = <<-SCRIPT
+				puts "The cat sits upright, awaiting your command."
+				return true
+			SCRIPT
+			
 			item(:dead_mouse, 'mouse', 'dead', 'eaten')
 		end
 
 		item(:remote_control, 'remote', 'control') do
+			self.script_accept = <<-SCRIPT
+				if [:new_batteries, :old_batteries].include?(args[0].tag) && children.empty?
+					return true
+				elsif !children.empty?
+					puts "There are already batteries in the remote."
+					return false
+				else
+					puts "That won't fit into the remote."
+					return false
+				end
+			SCRIPT
+					
+			self.script_use = <<-SCRIPT
+				if !find(:new_batteries)
+					puts "The remote doesn't seem to work."
+					return
+				end
+
+				if args[0].tag == :cat 
+					args[0].script('control')
+					return
+				else
+					puts "The remote doesn't seem to work with that."
+					return
+				end
+			SCRIPT
+
 			item(:dead_batteries, 'batteries', 'dead', 'AA')
 		end
 	end
@@ -300,9 +350,16 @@ root = Node.root do
 
 	room(:hall) do
 		self.exit_west = :living_room
+
+		self.script_enter = <<-SCRIPT
+			puts "A forcefield stops you from entering the hall."
+			return false
+			SCRIPT
+		end
 	end
 end
 
 puts root
 root.save_graph
 root.save_map
+
