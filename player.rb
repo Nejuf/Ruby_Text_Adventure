@@ -1,5 +1,5 @@
-load './node.rb'
-
+require_relative 'node'
+p Node
 class Player < Node
 
 	def play

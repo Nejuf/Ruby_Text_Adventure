@@ -1,7 +1,6 @@
 require 'ostruct'
 require 'graph'
 require 'yaml'
-require_relative 'player'
 
 class Node < OpenStruct
 
