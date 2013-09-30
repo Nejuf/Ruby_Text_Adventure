@@ -64,6 +64,35 @@ class Node < OpenStruct
   	Node.new(nil, :root, &block)
   end
 
+  def described?
+  	if respond_to?(:described)
+  		self.described
+  	else
+  		false
+  	end
+  end
+
+  def describe
+  	if !described? && respond_to?(:desc)
+  		self.described = true
+  		puts desc
+  	elsif respond_to?(:short_desc)
+  		puts short_desc
+  	else
+  		#Just make something up
+  		puts "You are in #{tag}"
+  	end
+
+  	#Apprend presence of children nodes if open
+  	if open
+  		children.each do |c|
+  			base << (c.presence || '')
+  		end
+  	end
+
+  	puts base
+  end
+  			
   def ancestors(list=[])
   	if parent.nil?
   		return list
@@ -324,6 +353,14 @@ root = Node.root do
 				puts "The cat sits upright, awaiting your command."
 				return true
 			SCRIPT
+
+			self.desc = <<-DESC
+				A pumpkin-colored long-haired cat.
+			DESC
+
+			self.presence = <<-PRES
+				A cat dozes lazily here.
+			PRES
 
 			item(:dead_mouse, 'mouse', 'dead', 'eaten')
 		end

@@ -1,3 +1,4 @@
+require_relative 'Node'
 
 class Player < Node
 
@@ -18,9 +19,6 @@ class Player < Node
 			do_go(dir)
 		end
 	end
-	alias_method :do_get, :do_take
-	alias_method :do_inv, :do_inventory
-	alias_method :do_i, :do_inventory
 
 
 	def command(words)
@@ -85,6 +83,14 @@ class Player < Node
 		puts "You are in #{get_room.tag}"
 	end
 
+	def do_examine(*thing)
+		item = get_room.find(thing)
+		return if item.nil?
+
+		item.described = false
+		item.describe
+	end
+
 	def do_inventory(*a)
 		puts "You are carrying:"
 
@@ -92,10 +98,12 @@ class Player < Node
 			puts " * Nothing"
 		else
 			children.each do |c|
-				puts " * #{c.name} (#{c.words.join(' ')})"
+				puts " * #{c.short_description} (#{c.words.join(' ')})"
 			end
 		end
 	end
+	alias_method :do_inv, :do_inventory
+	alias_method :do_i, :do_inventory
 
 	def do_put(*words)
 		prepositions = [' in ', ' on ']
