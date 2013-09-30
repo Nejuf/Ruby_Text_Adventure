@@ -1,5 +1,6 @@
 require 'ostruct'
 require 'graph'
+require 'yaml'
 require_relative 'player'
 
 class Node < OpenStruct
@@ -10,7 +11,7 @@ class Node < OpenStruct
 		:item => {:open => false},
 		:player => {:open => true}
 	}
-  def initialize(parent, tag, defaults={}, &block)
+  def initialize(parent=nil, tag=nil, defaults={}, &block)#bug in YAML requires all params to have default value
 	super()
 	
 	defaults.each {|k,v| send("#{k}=", v)}
@@ -22,6 +23,26 @@ class Node < OpenStruct
 	
 	#yield(self) if block_given?
 	instance_eval(&block) unless block.nil?
+  end
+
+  def init_with(c)
+  	c.map.keys.each do |k|
+  		instance_variable_set("@#{k}", c.map[k])
+  	end
+
+  	@table.keys.each do |k|
+  		new_ostruct_member(k)
+  	end
+  end
+
+  def self.save(node, file='save.yaml')
+  	File.open(file, 'w+') do |f|
+  		f.puts node.to_yaml
+  	end
+  end
+
+  def self.load(file='save.yaml')
+  	YAML::load_file(file)
   end
 
   def room(tag, &block)
@@ -300,7 +321,7 @@ root = Node.root do
 				puts "The cat sits upright, awaiting your command."
 				return true
 			SCRIPT
-			
+
 			item(:dead_mouse, 'mouse', 'dead', 'eaten')
 		end
 
@@ -363,3 +384,25 @@ puts root
 root.save_graph
 root.save_map
 
+loop do 
+	player = root.find(:player)
+	player.do_look
+
+	print "What now? "
+	input = gets.chomp
+	verb = input.split(' ').first
+
+	case verb
+	when "load"
+		root = Node.load
+		puts "Loaded"
+	when "save"
+		Node.save(root)
+		puts "Saved"
+	when "quit"
+		puts "Goodbye!"
+		exit
+	else
+		player.command(input)
+	end
+end
